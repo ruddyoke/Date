@@ -5,7 +5,16 @@ namespace Roke\ServiceDate;
 class Date
 {
 
+	/**
+	* O for monday
+	* 6 for Sunday
+	**/
 	protected $week;
+
+	/**
+	* O for monday
+	* 6 for Sunday
+	**/
 	protected $week_truncated ;
 	protected $month ;
 	protected $month_truncated ;
@@ -86,5 +95,21 @@ class Date
 	        endif;
 	    endforeach;
 	}
+
+
+	/* Traitement sur une date passée en paramètre*/
+
+	public function getFirstDayWeek($date=null) {}
+	public function getLastDayWeek($date=null) {}
+
+	public function getMonday($date=null) {}
+	public function getSunday($date=null) {}
+
+
+	public function getFirstDayOfMonth($date=null) {}
+	public function getLastDayOfMonth($date=null) {}
+
+	public function getMonthOfDate() {}
+	public function getYearOfDate() {}
 
 }
