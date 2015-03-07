@@ -1,2 +1,2 @@
 # Date
-Get name of day or month in your language
+Get name of day or month in your language.
