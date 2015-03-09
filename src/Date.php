@@ -1,33 +1,40 @@
 <?php
 
-namespace Roke\ServiceDate;
+namespace Ruddyoke;
 
-class Date
-{
+class Date extends \Datetime{
 
 	/**
 	* O for monday
 	* 6 for Sunday
 	**/
 	protected $week;
+	protected $month;
 
-	/**
-	* O for monday
-	* 6 for Sunday
-	**/
-	protected $week_truncated ;
-	protected $month ;
-	protected $month_truncated ;
+	protected $date;
 
-    function __construct()
-    {
-        // $this->setWeek($week);
-        // $this->setWeekTruncated($week_truncated);
-        // $this->setMonth($month);
-        // $this->setMonthTruncated($month_truncated);
+    function __construct($date=null) {
+    	parent::__construct();
+    	// var_dump($this->format('Y-m-d H:i:sP'));
+    	// $this->date = $this->format('Y-m-d H:i:sP');
+        // $this->setWeek(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']);
+        // $this->setMonth(['January','February','March','April','May','June','July','August','September','October','November','December']);
     }
 
-	public function getDayName($num_day) {
+    /**
+     * Return Date in ISO8601 format
+     *
+     * @return String
+     */
+    public function __toString() {
+        return $this->format('Y-m-d H:i');
+    }
+
+    public function getDateInfos() {
+	    return getdate($this->getTimestamp());
+	}
+
+	public function getDayName() {
 	    return $this->week[intval($num_day - 1)];
 	}
 
