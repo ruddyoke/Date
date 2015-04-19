@@ -1,122 +1,116 @@
 <?php
-
 namespace Ruddyoke;
 
-class Date extends \Datetime{
+/**
+* 
+*/
+class Date extends \Datetime
+{
+	var $days = array();
+	var $months = array();
+	var $is_fr_format  = false;
+	var $date_iso = '';
+	var $date_fr = '';
+	var $separator = '--';
+	var $infos = array();
+
+	function __construct($date=null) {
+		$date = empty($date) ? null : $date;
+		$this->date_iso = $this->transformToIso($date);
+		parent::__construct($this->date_iso);
+		$this->setInfos()->setMonthName()->setWeekDay()->manage_day();
+		$this->dateTime = $this->format('Y/m/d h:i:s');
+		$this->dateTime_fr = $this->format('d/m/Y h:i:s');
+	}
+
+	private function transformToIso($date) {
+		if($date===null) return $date;
+		if(!$this->is_fr_format) return $date;
+
+		preg_match_all('#(\d{2})([\/_-])(\d{2})[\/_-](\d{4})( (\d{2})(:(\d{2}))?(:(\d{2}))?)?#', $date, $matches);
+		// var_dump($matches[4][0].'/'.$matches[3][0].'/'.$matches[1][0].$matches[5][0]);die();
+		$this->separator = $matches[2][0];
+		return $matches[4][0].'/'.$matches[3][0].'/'.$matches[1][0].$matches[5][0];
+	}
+
+	private function setInfos(){
+	    $this->infos = getdate($this->getTimestamp());
+	    return $this;
+	}
+
+	private function setMonthName(){
+		if(!$this->is_fr_format) return $this;
+	    $this->infos['month'] = $this->months[(int)$this->format('m')-1];
+	    return $this;
+	}
+
+	private function setWeekDay(){
+		if(!$this->is_fr_format) return $this;
+	    $this->infos['weekday'] = $this->days[(int)$this->format('w')-1];
+	    return $this;
+	}
+
+	public function getInfos(){
+	    return $this->infos;
+	}
+
+	public function getDateTime(){
+		if($this->is_fr_format) 
+			return $this->dateTime_fr;
+		return $this->dateTime;
+	}
+
+	public function getTime(){
+		return $this->format('h:i:s');
+	}
+
+	public function getDate(){
+		return explode(' ', $this->getDateTime())[0];
+	}
+
+	public function getMonth(){
+		return $this->format('m');
+	}
+
+	public function getMonthName(){
+		return $this->infos['month'];
+	}
+
+	public function getShortMonthName(){
+		return substr($this->getMonthName(), 0, 3) ;
+	}
+
+	public function getDayName(){
+		return $this->infos['weekday'];
+	}
+
+	public function getShortDayName(){
+		return substr($this->getDayName(), 0, 3) ;
+	}
 
 	/**
-	* O for monday
-	* 6 for Sunday
-	**/
-	protected $week;
-	protected $month;
-
-	protected $date;
-
-    function __construct($date=null) {
-    	parent::__construct();
-    	// var_dump($this->format('Y-m-d H:i:sP'));
-    	// $this->date = $this->format('Y-m-d H:i:sP');
-        // $this->setWeek(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']);
-        // $this->setMonth(['January','February','March','April','May','June','July','August','September','October','November','December']);
-    }
-
-    /**
-     * Return Date in ISO8601 format
-     *
-     * @return String
-     */
-    public function __toString() {
-        return $this->format('Y-m-d H:i');
-    }
-
-    public function getDateInfos() {
-	    return getdate($this->getTimestamp());
+	* Return an date object
+	*/
+	public function getMonthFirstDay(){
+		return $this->month_first_day;
 	}
 
-	public function getDayName() {
-	    return $this->week[intval($num_day - 1)];
+	public function getMonthLastDay(){
+		return $this->month_last_day;
 	}
 
-	public function getDayNameTruncated($num_day) {
-	    return $this->week_truncated[intval($num_day - 1)];
+	public function getMonthNbDays(){
+		return $this->month_nb_days;
 	}
 
-	public function getMonthName($num_month) {
-	    return $this->month[intval($num_month - 1)];
+	private function manage_day(){
+		list($Y, $M, $D) = explode('/', $this->format('Y/m/d'));
+		$this->month_first_day   = date('d/m/Y', mktime(0, 0, 0, $M, 1, $Y));
+		$this->month_nb_days = date("t", mktime(0, 0, 0, $M, 1, $Y));
+		$this->month_last_day    = date('d/m/Y', mktime(0, 0, 0, $M, $this->month_nb_days, $Y));
+		return $this;
 	}
 
-	public function getMonthNameTruncated($num_month) {
-	    return $this->month_truncated[intval($num_month - 1)];
-	}
-
-
-	protected function setWeek($week) {
-		$this->week = $week;
-	}
-
-	public function getWeek() {
-		return $this->week;
-	}
-
-	protected function setWeekTruncated($week_truncated) {
-		$this->week = $week;
-	}
-
-	public function getWeekTruncated() {
-		return $this->week_truncated;
-	}
-
-	protected function setMonth($month) {
-		$this->month = $month;
-	}
-
-	public function getMonth() {
-		return $this->month;
-	}
-
-	protected function setMonthTruncated($month_truncated) {
-		$this->month_truncated = $month_truncated;
-	}
-
-	public function getMonthTruncated() {
-		return $this->month_truncated;
-	}
-
-	/**
-	 * Retourne le numero du jour en basant sur son nom.
-	 * @global Array $semaine_fr tableau de noms de jour de la semaine.
-	 * @param String $nomJour Nom du jour
-	 * @return Int
-	 */
-	public function getNumjour($nomJour) {
-	    foreach ($this->semaine_fr as $key => $jour):
-	        if ($jour == $nomJour):
-	            return ($key + 1);
-	        endif;
-	    endforeach;
-
-	    foreach ($this->semaine_fr_truncate as $key => $jour):
-	        if ($jour == $nomJour):
-	            return ($key + 1);
-	        endif;
-	    endforeach;
-	}
-
-
-	/* Traitement sur une date passée en paramètre*/
-
-	public function getFirstDayWeek($date=null) {}
-	public function getLastDayWeek($date=null) {}
-
-	public function getMonday($date=null) {}
-	public function getSunday($date=null) {}
-
-
-	public function getFirstDayOfMonth($date=null) {}
-	public function getLastDayOfMonth($date=null) {}
-
-	public function getMonthOfDate() {}
-	public function getYearOfDate() {}
-
+	/*public function __tostring(){
+	}*/
 }
