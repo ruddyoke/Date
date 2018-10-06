@@ -113,4 +113,8 @@ class Date extends \Datetime
 
 	/*public function __tostring(){
 	}*/
+	
+	public functionmakeSecondsInDate(){
+		return gmdate("H:i:s", 685);
+	}
 }
